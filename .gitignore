@@ -1,0 +1,6 @@
+node_modules/
+.venv/
+__pycache__/
+projekt/out/
+*.mp4
+remotion-tmp/
