@@ -2,7 +2,7 @@
 # distracting"): ONE theme (the shared F-major tune on a plucked mandolin), four broad moods (building, the wars,
 # rebuilding and fixing, 1944 at sunset) crossfading over 2 s, and only the story's key effects. QUIET mix: music
 # ~-22 LU under the voice while it speaks (duck -8 dB), effects 10 dB under their naive level. -15 LUFS / -1.2 dBTP.
-# usage: python audio/pisa/pisa_audio.py  ->  audio/pisa/mix.wav, stem_*.wav, cues.md
+# usage: python audio/pisa/pisa_audio.py  ->  audio/pisa/mix.wav, stem_*.wav, cues.md (ED=de: the German edition, *_de.*)
 import json, os, sys
 import numpy as np
 
@@ -17,17 +17,34 @@ import sfx_gen as G
 import stink_audio as SA  # shared helpers: put, roll, theme, chords, limiter, ducking, small synths
 
 FPS, TOTAL = 30, 2475
-DUR = TOTAL / FPS
-N = ns(DUR)
 fr = lambda f: f / FPS
 VOICE = os.path.join(ROOT, "voice", "leaning-tower", "voice_final.wav")
 WORDS = os.path.join(ROOT, "voice", "leaning-tower", "words.json")
+OUT = ""
+# ED=de: the German edition. Cue times stay in English story frames and go through story.ts WARP_DE (the same time
+# map the picture uses), so music sections and effects land on the German words.
+if os.environ.get("ED") == "de":
+    import re
+    _src = open(os.path.join(ROOT, "src", "videos", "pisa", "story.ts"), encoding="utf-8").read()
+    _blk = _src[_src.index("= [", _src.index("const WARP_DE")):]
+    _blk = _blk[: _blk.index("];")]
+    _total_de = int(re.search(r"export const TOTAL_DE = (\d+)", _src).group(1))
+    _pairs = [(float(TOTAL) if a == "TOTAL" else float(a), float(_total_de) if b == "TOTAL_DE" else float(b))
+              for a, b in re.findall(r"\[(\w+), (\w+)\]", _blk)]
+    _en, _de = zip(*_pairs)
+    fr = lambda f: float(np.interp(f, _en, _de)) / FPS
+    TOTAL = _total_de
+    VOICE = os.path.join(ROOT, "voice", "leaning-tower-de", "voice_final.wav")
+    WORDS = os.path.join(ROOT, "voice", "leaning-tower-de", "words.json")
+    OUT = "_de"
+DUR = TOTAL / FPS
+N = ns(DUR)
 TARGET_LUFS, CEIL_DBTP, DUCK_DB, SFX_DB = -15.0, -1.2, -8.0, -10.0
 F, Q = I.m2f, SA.Q
 BAR = 4 * Q
 put = SA.put
 
-TIP, LURCH, EASE, BANANA, SIT, BURST_MARCH = fr(362), fr(1585), fr(1944), fr(1373), fr(1020), 18.6
+TIP, LURCH, EASE, BANANA, SIT, BURST_MARCH = fr(362), fr(1585), fr(1944), fr(1373), fr(1020), fr(558)  # boots burst at 18.6 s (story frame 558)
 
 SECTIONS = [  # (name, start, end, mood): one theme, four moods
     ("build", 0.0, fr(560), "build"), ("wars", fr(560), fr(1112), "wars"), ("fix", fr(1112), fr(2005), "fix"), ("1944", fr(2005), DUR, "warm"),
@@ -300,10 +317,10 @@ def main():
         Gm += TARGET_LUFS - L
     y = fades(y, 0.0, 0.03)
     print(f"master {integrated(y):.2f} LUFS, TP {true_peak(y):.2f} dBTP")
-    write_wav(os.path.join(HERE, "mix.wav"), y)
+    write_wav(os.path.join(HERE, f"mix{OUT}.wav"), y)
     for nm, x in [("voice", v), ("music", m), ("sfx", s)]:
-        write_wav(os.path.join(HERE, f"stem_{nm}.wav"), x * dbg(Gm))
-    with open(os.path.join(HERE, "cues.md"), "w", encoding="utf-8") as f:
+        write_wav(os.path.join(HERE, f"stem_{nm}{OUT}.wav"), x * dbg(Gm))
+    with open(os.path.join(HERE, f"cues{OUT}.md"), "w", encoding="utf-8") as f:
         f.write(f"# The Leaning Tower: sound cues\n\nMaster {integrated(y):.2f} LUFS, TP {true_peak(y):.2f} dBTP, {DUR:.3f} s.\n\n| Section | Start | End | Gain |\n|---|---|---|---|\n")
         for nm, a, b, g in levels:
             f.write(f"| {nm} | {a:.2f} | {b:.2f} | {g:+.1f} |\n")

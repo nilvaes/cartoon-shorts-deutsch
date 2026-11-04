@@ -4,3 +4,6 @@ __pycache__/
 projekt/out/
 *.mp4
 remotion-tmp/
+projekt/audio/**/mix*.wav
+projekt/audio/**/stem_*.wav
+projekt/audio/**/cues*.md

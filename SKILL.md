@@ -5,7 +5,10 @@ description: Make a German vertical cartoon short (55-90 s) on your own PC. Flat
 
 # Cartoon-Shorts auf Deutsch
 
-The result is a 1440x2560 MP4 at 30 fps, about 55–90 s long. A true, surprising story is told by a German narrator, with burned-in captions and its own music. The worked example is **Pisa** ("Der Turm, den der Krieg rettete"): code in `projekt/src/videos/pisa/`, script in `projekt/stories/leaning-tower/`.
+The result is a 1440x2560 MP4 at 30 fps, about 55–90 s long. A true, surprising story is told by a German narrator, with burned-in captions and its own music. The worked example is **Pisa** ("Der Turm, den der Krieg rettete"):
+- code in `projekt/src/videos/pisa/`, script in `projekt/stories/leaning-tower/`
+- German voice in `projekt/voice/leaning-tower-de/`, composition `PisaShortDE` (sound: `ED=de python audio/pisa/pisa_audio.py`)
+- the English original is `PisaShort`
 
 ## Rules
 - **Our own content:** story, script, characters and shots are always new. Never recreate another creator's video, characters or branding. No real living people as characters, and no logos or mascots.
@@ -107,6 +110,14 @@ python tools/deutsch.py fertig out/<name>/bild.mp4 audio/<name>/mix.wav out/<nam
 ```
    Without your own sound script (e.g. a music file only): `fertig bild.mp4 voice.wav … --woerter voice.json --bett musik.wav`. The music then dips automatically under the voice.
 5. YouTube CC file: `python tools/deutsch.py untertitel voice/<name>/voice.json out/<name>/untertitel.srt`.
+
+## Re-voicing a finished short (other voice or language)
+When a short is already animated and gets a new voice, don't rebuild it. Use a **time map**, as in the Pisa example (`WARP_DE` in `story.ts`):
+1. `deutsch.py stimme` + `woerter` for the new voice. Put 0.5 s of silence in front (`ffmpeg -af adelay=500`) and add 0.5 s to the word times.
+2. Pairs `[old frame, new frame]`: every sentence start, plus the words the picture reacts to (impacts, props, punchlines). Both columns must rise strictly.
+3. In `story.ts`: `TOTAL_DE`, `WARP_DE`, `de2en`/`en2de`. In the main component: `f = lang === "de" ? de2en(fo) : fo`. In `Root.tsx`: two compositions with `lang: "de"`.
+4. Sound: under `ED=de`, the sound script reads the same map and runs every cue time through it. Write every time value as `fr(frame)`, never as plain seconds.
+5. Check: stills at matching frames (old/new) must be identical.
 
 ## 10. Final check
 - `python tools/deutsch.py pruefen out/<name>/<Titel>.mp4 out/<name>/blatt.jpg`: does a caption cover a face? Fix it with `untertitel --move t0-t1:y`.

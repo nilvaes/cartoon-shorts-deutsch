@@ -238,3 +238,25 @@ export const FOCUS: { a: number; b: number; what: string; pts: V3[] | ((f: numbe
   { a: 1990, b: 2000, what: "tower (eased)", pts: [[5, 44, 0], [0, 1, -7.5]] },
   { a: 2140, b: 2380, what: "sergeant", pts: head(-6, -30.5) },
 ];
+
+// ---------------- German edition: a time map from the German voice to the English timeline ----------------
+// pairs [English frame, German frame]: every sentence start plus the key words (kippen, Matratze, Banane, Beton,
+// gesperrt, Sergeant, Krieg …) from voice/leaning-tower-de/words.json. Everything in between stretches linearly,
+// so animation, camera, effects and sound all follow the German narration.
+export const TOTAL_DE = 2717;
+const WARP_DE: [number, number][] = [
+  [0, 0], [22, 15], [118, 116], [140, 149], [263, 293], [362, 401], [385, 419], [565, 584], [623, 658], [647, 676],
+  [727, 770], [788, 832], [832, 881], [970, 1021], [989, 1042], [1121, 1195], [1282, 1366], [1342, 1426], [1351, 1443],
+  [1357, 1458], [1378, 1481], [1406, 1539], [1508, 1630], [1534, 1676], [1573, 1712], [1585, 1726], [1621, 1755],
+  [1743, 1901], [1772, 1931], [2011, 2176], [2103, 2268], [2163, 2356], [2302, 2484], [2384, 2588], [2425, 2655],
+  [TOTAL, TOTAL_DE],
+];
+const lerpMap = (x: number, pairs: [number, number][], from: 0 | 1) => {
+  const to = 1 - from;
+  if (x <= pairs[0][from]) return pairs[0][to];
+  for (let i = 1; i < pairs.length; i++) if (x <= pairs[i][from]) { const a = pairs[i - 1], b = pairs[i]; return a[to] + ((x - a[from]) / (b[from] - a[from])) * (b[to] - a[to]); }
+  return pairs[pairs.length - 1][to];
+};
+/** German frame -> English story frame (what the scene shows) and back (for sound cues) */
+export const de2en = (f: number) => lerpMap(f, WARP_DE, 1);
+export const en2de = (f: number) => lerpMap(f, WARP_DE, 0);

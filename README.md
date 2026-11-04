@@ -13,7 +13,7 @@ Flache 2D-Figuren in einer bunten 3D-Welt, mit Tusche-Linien, Unschärfe, fliege
 - 🎵 **Eigene Musik und Soundeffekte** – direkt im Code erzeugt, keine Lizenzprobleme
 - 💬 **Untertitel im Video** – auch lange deutsche Wörter passen auf den Bildschirm
 - 📺 **YouTube-fertig** – 1440x2560, richtige Lautstärke, plus `.srt`-Datei
-- 🏛️ **Ein komplettes Beispiel**: „Der Turm, den der Krieg rettete“ (Pisa)
+- 🏛️ **Ein komplettes Beispiel auf Deutsch**: „Der Turm, den der Krieg rettete“ (Pisa) – mit deutscher Stimme, Musik und Effekten
 
 ## Was du brauchst
 
@@ -59,6 +59,7 @@ Claude schreibt dir das Skript. Wenn es dir gefällt, nimmst du die Stimme auf (
 | `projekt/tools/deutsch.py` | Stimme, Wort-Timing, Untertitel, Mix, Prüfblatt |
 | `projekt/scripts/` | Testbilder, Motion-Blur-Render, Qualitätskontrolle |
 | `projekt/stories/leaning-tower/` | Das Beispiel-Skript mit Quellen (Englisch + Deutsch) |
+| `projekt/voice/leaning-tower-de/` | Die deutsche Beispiel-Stimme mit Wort-Timing |
 
 ## Lizenz
 

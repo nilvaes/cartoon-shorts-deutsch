@@ -18,7 +18,7 @@ import { InkPass, noInkFallback } from "./ink";
 import { LensBlur, GrainEffect } from "./lensblur";
 import { GradeEffect, GRADES, GRADE_STRENGTH, gradeFor } from "./grade";
 import { Kit } from "./build";
-import { TOTAL, FLASH_AT, SHOTS, layersAt, dofAt } from "./story";
+import { TOTAL, FLASH_AT, SHOTS, layersAt, dofAt, de2en } from "./story";
 
 export const PISA_FRAMES = TOTAL;
 
@@ -106,10 +106,11 @@ const ShotView: React.FC<{ id: number; kit: Kit; alpha: number; f: number }> = (
 
 /** sub = sub-frames per output frame (the motion-blur composition renders 4 and ffmpeg averages them, tmix);
  *  shutter = share of the frame interval the sub-frames span (0.5 = a 180-degree film shutter) */
-export const PisaShort: React.FC<{ sub?: number; shutter?: number }> = ({ sub = 1, shutter = 0.5 }) => {
+/** lang "de": the frame counts the German narration; the scene is shown at the matching English story frame (de2en) */
+export const PisaShort: React.FC<{ sub?: number; shutter?: number; lang?: "en" | "de" }> = ({ sub = 1, shutter = 0.5, lang = "en" }) => {
   const raw = useCurrentFrame();
   const fi = Math.floor(raw / sub), fo = sub > 1 ? fi + ((raw % sub) / sub) * shutter : raw;
-  const f = fo, fl = Math.floor(f - FLASH_AT);
+  const f = lang === "de" ? de2en(fo) : fo, fl = Math.floor(f - FLASH_AT);
   const kit = useKit();
   if (!kit) return null;
   const flash = fl >= 0 && fl < 4 ? [1, 0.75, 0.45, 0.2][fl] : 0;
